@@ -324,7 +324,7 @@ const TypewriterVignette: React.FC<{ active: boolean }> = ({ active }) => {
           <Image
             width={64}
             height={64}
-            src="/assets/testimonials/heenamistry.jpg"
+            src="https://media.licdn.com/dms/image/v2/D4E03AQFJWP9HrgaCpg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1732404714238?e=1778112000&v=beta&t=3cinkLwM7BeOk37JREfeqG8xbh_pO-1Bja7hs8feC4I"
             alt="Heena Mistry, IT Prject Manager at West Yorkshire Police"
             className="w-full h-full object-cover"
           />
