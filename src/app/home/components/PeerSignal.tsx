@@ -2,23 +2,26 @@
 
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import AppImage from '@/components/ui/AppImage';
+import { getGithubContributions, GithubStats } from './getGithubContributions';
 
 interface Testimonial {
   quote: string;
   name: string;
   title: string;
+  linkedin: string;
   company: string;
   avatar: string;
   context: string;
 }
 
-const testimonials: Testimonial[] = [ 
- 
+const testimonials: Testimonial[] = [
+
   {
     quote:
       "Vipin's deployment strategy saved us from a critical outage. His understanding of Azure infrastructure and Terraform automation turned a potential disaster into a seamless rollback. The monitoring dashboards he built are still our gold standard.",
     name: 'Linda Chambers',
     title: 'IT Delivery Manager',
+    linkedin: "https://www.linkedin.com/in/linda-chambers-8222762/",
     avatar: "https://media.licdn.com/dms/image/v2/C4D03AQGwciuz13HJwg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1610479936431?e=1778112000&v=beta&t=nHwrbi7Qdt0a2zuajNhGnJUQ7Dqg08nbqi9CDtlrtQE",
     company: 'ASDA',
     context: 'On a Production Deployment',
@@ -27,18 +30,20 @@ const testimonials: Testimonial[] = [
     quote:
       "His deep dive on GitHub Advanced Security integration was eye-opening. Vipin doesn't just implement tools—he architects secure-by-default pipelines. The way he explained GHAS to our team made adoption immediate.",
     name: 'Sumit Kumar',
-    title: 'Principal Engineer',
-    avatar: "https://media.licdn.com/dms/image/v2/C5603AQH8xWZvY5cirw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1606288093250?e=1778112000&v=beta&t=Pe5xlS84q0KNJ7BiBEC7_PmFDoiI35eQovVhMccTIqc",
-    company: 'Salesforce',
+    title: 'Senior Application Engineer',
+    linkedin: "https://www.linkedin.com/in/sumit1523/",
+    avatar: "https://media.licdn.com/dms/image/v2/D5603AQFox9ZZrFrZ2A/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1712355884709?e=1778716800&v=beta&t=M4p6yFdBh51D9MyjtDsIlQswinuP54bPpBeasLBR46w",
+    company: 'SAP Labs',
     context: 'After a conference talk',
   },
   {
     quote:
       "The platform engineering work Vipin delivered was exceptional. His infrastructure-as-code approach with Terraform and YAML templating made our handover process smooth. Everything was documented, tested, and production-ready from day one.",
-    name: 'Maneesh Kumar',
-    title: 'IT Project Manager',
-    avatar: "https://media.licdn.com/dms/image/v2/D5635AQHbWvDD6wFAdw/profile-framedphoto-shrink_800_800/B56ZUhz.ycGUAk-/0/1740029029952?e=1777161600&v=beta&t=nWQhgwAtF25UoF-aLm-93vpRsqxTWpQX2DAikBV2U8o",
-    company: 'West Yorkshire Police',
+    name: 'Mayank Chandravanshi',
+    title: 'Automation Test Lead',
+    linkedin: "https://www.linkedin.com/in/mayank-chandravanshi/",
+    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQFxWASLR61huw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1728516984416?e=1778716800&v=beta&t=gvdqMwlakQaB_yCMkPRBw4mUDTGar7yD17m4R4CVp94",
+    company: 'Accenture',
     context: 'After a HOTO(Handover Takeover) meeting',
   },
   {
@@ -46,6 +51,7 @@ const testimonials: Testimonial[] = [
       "Vipin's MERN stack architecture is handling 80k requests/sec in production. His CI/CD pipelines using GitHub Copilot for code generation and automated testing caught issues before they reached staging. Zero downtime in six months.",
     name: 'Aniket Bhatt',
     title: 'Engineering Manager',
+    linkedin: "https://www.linkedin.com/in/aniket-bhatt-54633bb/",
     avatar: "https://media.licdn.com/dms/image/v2/C4E03AQF5SQHFRbsI1g/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1516359155905?e=1778112000&v=beta&t=8qRrkfbAgtJHYw6_uMQIuw5vPjWoVrVjV5ZFzGutxaE",
     company: 'ASDA',
     context: 'GitHub discussion thread',
@@ -55,22 +61,65 @@ const testimonials: Testimonial[] = [
       "Working alongside Vipin on our Azure cloud migration was a masterclass in DevOps excellence. His Terraform modules for multi-environment provisioning and GitHub Actions workflows reduced our deployment time by 70%. The infrastructure he designed is self-healing and fully observable.",
     name: 'Biswajit Kar',
     title: 'Senior DevOps Engineer',
+    linkedin: "https://www.linkedin.com/in/biswajit-kar-1b641a141/",
     avatar: "https://media.licdn.com/dms/image/v2/C4D03AQGQeh00yoX5IA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1635530611405?e=1778112000&v=beta&t=DXstjrR4gcobFdfsFBZNt7GxIUk__jQt_ouadAfjRQ0",
     company: 'TCS',
     context: 'Post cloud migration project',
-  },  
+  },
 ];
 
-// GitHub contribution heatmap mock
-const generateContribData = () => {
-  const weeks = 52;
-  const days = 7;
-  return Array.from({ length: weeks }, (_, w) =>
-    Array.from({ length: days }, (_, d) => {
-      if (d === 0 || d === 6) return Math.random() > 0.7 ? Math.floor(Math.random() * 3) : 0;
-      return Math.random() > 0.25 ? Math.floor(Math.random() * 6) + 1 : 0;
-    })
+// Maps a raw contribution count to a 0–4 level for colour bucketing
+export const getContribLevel = (count: number): number => {
+  if (count === 0) return 0;
+  if (count <= 3) return 1;
+  if (count <= 6) return 2;
+  if (count <= 9) return 3;
+  return 4;
+};
+
+/**
+ * Converts a flat array of { date, count } objects from the GitHub API into a
+ * 52-column × 7-row grid where:
+ *   - each column is a calendar week (oldest → newest, left → right)
+ *   - each row is a weekday (0 = Sun … 6 = Sat)
+ *
+ * Fix vs. original:
+ *   - Uses the *position* of each day in the sorted array rather than a
+ *     year-relative week index, so a rolling 52-week window always fills
+ *     exactly 52–53 columns with no gaps or off-by-one misalignment.
+ *   - Stores contribution *levels* (0–4) instead of raw counts so the colour
+ *     function receives the values it expects.
+ */
+export const transformContribData = (res: GithubStats): number[][] => {
+  const { days } = res
+  // Sort ascending so week 0 is the oldest
+  const sorted = [...days].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
+
+  const weeks: number[][] = [];
+
+  sorted.forEach((day) => {
+    const date = new Date(day.date);
+    const dayOfWeek = date.getDay(); // 0 Sun – 6 Sat
+
+    // Start a new column on every Sunday (or for the very first entry)
+    if (dayOfWeek === 0 || weeks.length === 0) {
+      weeks.push(Array(7).fill(0));
+    }
+
+    const currentWeek = weeks[weeks.length - 1];
+    currentWeek[dayOfWeek] = getContribLevel(day.count);
+  });
+
+  return weeks;
+};
+
+// GitHub contribution heatmap mock
+const generateContribData = async () => {
+  const res = await getGithubContributions('vpnsin');
+  const contribData = transformContribData(res);
+  return { res, contribData };
 };
 
 const getContribColor = (level: number): string => {
@@ -85,7 +134,11 @@ const getContribColor = (level: number): string => {
 const PeerSignal: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  const contribData = React.useMemo(() => generateContribData(), []);
+  const [userData, setUserData] = React.useState<{ res: GithubStats; contribData: number[][]; }>({ res: {} as GithubStats, contribData: [] });
+
+  React.useEffect(() => {
+    generateContribData().then(setUserData);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -167,8 +220,7 @@ const PeerSignal: React.FC = () => {
               </p>
               <div className="flex items-center gap-4">
                 <div
-                  className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-2"
-                  style={{ ringColor: 'rgba(255,255,255,0.1)' }}
+                  className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white ring-opacity-10"
                 >
                   <AppImage
                     src={testimonials[0].avatar}
@@ -176,6 +228,7 @@ const PeerSignal: React.FC = () => {
                     width={44}
                     height={44}
                     className="w-full h-full object-cover"
+                    onClick={() => window.open(testimonials[0].linkedin, '_blank')}
                   />
                 </div>
                 <div>
@@ -245,6 +298,7 @@ const PeerSignal: React.FC = () => {
                     <AppImage
                       src={t.avatar}
                       alt={`${t.name}, ${t.title} at ${t.company}`}
+                      onClick={() => window.open(t.linkedin, '_blank')}
                       width={36}
                       height={36}
                       className="w-full h-full object-cover"
@@ -306,12 +360,12 @@ const PeerSignal: React.FC = () => {
               >
                 GitHub Activity
               </p>
-              <p
+              {userData?.res?.total && <p
                 className="font-serif font-medium"
                 style={{ fontFamily: 'Fraunces, serif', color: '#3B3B3B', fontSize: '18px' }}
               >
-                1,247 contributions in the last year
-              </p>
+                {userData.res.total} contributions in the last year
+              </p>}
             </div>
             <div className="flex items-center gap-3">
               <span
@@ -339,18 +393,21 @@ const PeerSignal: React.FC = () => {
           {/* Heatmap grid */}
           <div className="overflow-x-auto">
             <div className="flex gap-1" style={{ minWidth: '700px' }}>
-              {contribData.map((week, wi) => (
-                <div key={wi} className="flex flex-col gap-1">
-                  {week.map((day, di) => (
-                    <div
-                      key={di}
-                      className="contrib-cell"
-                      style={{ background: getContribColor(day) }}
-                      title={`${day} contributions`}
-                    />
-                  ))}
-                </div>
-              ))}
+              {userData?.contribData?.length === 0 ? (
+                <div style={{ color: "#6B6B6B", fontSize: 12 }}>Loading...</div>
+              ) : (
+                userData?.contribData.map((week, wi) => (
+                  <div key={wi} className="flex flex-col gap-1">
+                    {week.map((day, di) => (
+                      <div
+                        key={di}
+                        className="contrib-cell"
+                        style={{ background: getContribColor(day) }}
+                        title={`${day} contributions`}
+                      />
+                    ))}
+                  </div>
+                )))}
             </div>
           </div>
 
@@ -360,10 +417,10 @@ const PeerSignal: React.FC = () => {
             style={{ borderTop: '1px solid rgba(59,59,59,0.06)' }}
           >
             {[
-              { label: 'Public repos', value: '34' },
-              { label: 'Stars earned', value: '2.1k' },
-              { label: 'PRs merged', value: '187' },
-              { label: 'Issues closed', value: '412' },
+              { label: 'Public repos', value: userData.res.publicRepos },
+              { label: 'Stars earned', value: userData.res.totalStars },
+              { label: 'Followers', value: userData.res.followers },
+              { label: 'Location', value: userData.res.location },
             ].map((stat) => (
               <div key={stat.label}>
                 <div
