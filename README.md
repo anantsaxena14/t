@@ -116,4 +116,4 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 3 · JetBrains
 
 ## 📄 License
 
-Fork it, ship it, make it yours. Attribution appreciated but not required.
+[MIT](LICENSE) — fork it, ship it, make it yours. Attribution appreciated but not required.
