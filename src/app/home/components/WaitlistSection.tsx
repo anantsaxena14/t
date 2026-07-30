@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { newsletter } from '@/config/portfolio';
 
 const WaitlistSection: React.FC = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState(0);
-  const targetCount = 847;
+  const targetCount = newsletter.startCount;
   const sectionRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [countAnimated, setCountAnimated] = useState(false);
@@ -19,8 +20,7 @@ const WaitlistSection: React.FC = () => {
           setVisible(true);
           if (!countAnimated) {
             setCountAnimated(true);
-            // Animate counter
-            const start = 0;
+            // Animate counter from 0 → targetCount
             const duration = 2000;
             const startTime = performance.now();
             const animate = (now: number) => {
@@ -38,7 +38,7 @@ const WaitlistSection: React.FC = () => {
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, [countAnimated]);
+  }, [countAnimated, targetCount]);
 
   // Simulate occasional new signups
   useEffect(() => {
@@ -65,7 +65,8 @@ const WaitlistSection: React.FC = () => {
 
   return (
     <section
-      id="waitlist"
+      id="newsletter"
+      data-tour="newsletter"
       ref={sectionRef}
       className="py-32 px-8"
       style={{
@@ -100,7 +101,7 @@ const WaitlistSection: React.FC = () => {
                   letterSpacing: '0.25em',
                 }}
               >
-                Coming Soon
+                {newsletter.eyebrow}
               </span>
             </div>
 
@@ -117,7 +118,7 @@ const WaitlistSection: React.FC = () => {
                   fontSize: '14px',
                 }}
               >
-                engineers already saved a seat
+                {newsletter.countLabel}
               </p>
             </div>
 
@@ -131,9 +132,11 @@ const WaitlistSection: React.FC = () => {
                 lineHeight: 1.1,
               }}
             >
-              The build log.
+              {newsletter.headlineTop}
               <br />
-              <span style={{ fontStyle: 'italic', color: '#C2785C' }}>One per month.</span>
+              <span style={{ fontStyle: 'italic', color: '#C2785C' }}>
+                {newsletter.headlineBottom}
+              </span>
             </h2>
 
             {/* Promise */}
@@ -147,18 +150,12 @@ const WaitlistSection: React.FC = () => {
                 maxWidth: '440px',
               }}
             >
-              One build log per month — no spam, no fluff, just the notebook. Deep dives into
-              whatever I'm building, annotated with decisions, mistakes, and the parts that took
-              three rewrites to get right.
+              {newsletter.promise}
             </p>
 
             {/* What you get */}
             <div className="space-y-3">
-              {[
-                "The architecture decision that didn't make the README",
-                'Benchmark results, including the ones that were embarrassing',
-                'One recommended read that changed how I think',
-              ].map((item, i) => (
+              {newsletter.bullets.map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div
                     className="w-4 h-4 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center"
@@ -206,7 +203,7 @@ const WaitlistSection: React.FC = () => {
                       letterSpacing: '0.2em',
                     }}
                   >
-                    Reserve your spot
+                    {newsletter.formLabel}
                   </p>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
@@ -269,11 +266,11 @@ const WaitlistSection: React.FC = () => {
                           >
                             <path d="M21 12a9 9 0 11-6.219-8.56" />
                           </svg>
-                          Saving your seat...
+                          {newsletter.ctaLoadingLabel}
                         </>
                       ) : (
                         <>
-                          Save Me a Seat
+                          {newsletter.ctaLabel}
                           <svg
                             width="16"
                             height="16"
@@ -297,65 +294,79 @@ const WaitlistSection: React.FC = () => {
                       fontSize: '11px',
                     }}
                   >
-                    Unsubscribe any time. No dark patterns, no upsells.
+                    {newsletter.finePrint}
                   </p>
 
-                  {/* Divider */}
-                  <div className="flex items-center gap-4 my-8">
-                    <div className="flex-1 h-px" style={{ background: 'rgba(245,240,235,0.06)' }} />
-                    <span
-                      className="font-mono text-xs"
-                      style={{
-                        fontFamily: 'JetBrains Mono, monospace',
-                        color: 'rgba(245,240,235,0.2)',
-                        fontSize: '10px',
-                      }}
-                    >
-                      or
-                    </span>
-                    <div className="flex-1 h-px" style={{ background: 'rgba(245,240,235,0.06)' }} />
-                  </div>
+                  {newsletter.repoUrl && (
+                    <>
+                      {/* Divider */}
+                      <div className="flex items-center gap-4 my-8">
+                        <div
+                          className="flex-1 h-px"
+                          style={{ background: 'rgba(245,240,235,0.06)' }}
+                        />
+                        <span
+                          className="font-mono text-xs"
+                          style={{
+                            fontFamily: 'JetBrains Mono, monospace',
+                            color: 'rgba(245,240,235,0.2)',
+                            fontSize: '10px',
+                          }}
+                        >
+                          or
+                        </span>
+                        <div
+                          className="flex-1 h-px"
+                          style={{ background: 'rgba(245,240,235,0.06)' }}
+                        />
+                      </div>
 
-                  {/* GitHub CTA */}
-                  <a
-                    href="https://github.com/mSingh"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-medium transition-all duration-300"
-                    style={{
-                      border: '1px solid rgba(245,240,235,0.1)',
-                      color: 'rgba(245,240,235,0.6)',
-                      fontFamily: 'DM Sans, sans-serif',
-                      fontSize: '14px',
-                      textDecoration: 'none',
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                        'rgba(245,240,235,0.25)';
-                      (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(245,240,235,0.9)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                        'rgba(245,240,235,0.1)';
-                      (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(245,240,235,0.6)';
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                    </svg>
-                    Star the repo instead
-                    <span
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-xs"
-                      style={{
-                        background: 'rgba(245,240,235,0.06)',
-                        fontFamily: 'JetBrains Mono, monospace',
-                        fontSize: '10px',
-                        color: 'rgba(245,240,235,0.4)',
-                      }}
-                    >
-                      ★ 2.1k
-                    </span>
-                  </a>
+                      {/* GitHub CTA */}
+                      <a
+                        href={newsletter.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-medium transition-all duration-300"
+                        style={{
+                          border: '1px solid rgba(245,240,235,0.1)',
+                          color: 'rgba(245,240,235,0.6)',
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontSize: '14px',
+                          textDecoration: 'none',
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                            'rgba(245,240,235,0.25)';
+                          (e.currentTarget as HTMLAnchorElement).style.color =
+                            'rgba(245,240,235,0.9)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                            'rgba(245,240,235,0.1)';
+                          (e.currentTarget as HTMLAnchorElement).style.color =
+                            'rgba(245,240,235,0.6)';
+                        }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                        </svg>
+                        Star the repo instead
+                        {newsletter.repoStars && (
+                          <span
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-xs"
+                            style={{
+                              background: 'rgba(245,240,235,0.06)',
+                              fontFamily: 'JetBrains Mono, monospace',
+                              fontSize: '10px',
+                              color: 'rgba(245,240,235,0.4)',
+                            }}
+                          >
+                            ★ {newsletter.repoStars}
+                          </span>
+                        )}
+                      </a>
+                    </>
+                  )}
                 </>
               ) : (
                 /* Success state */
@@ -408,7 +419,7 @@ const WaitlistSection: React.FC = () => {
                       fontSize: '11px',
                     }}
                   >
-                    You're #{count.toLocaleString()} on the list.
+                    You&rsquo;re #{count.toLocaleString()} on the list.
                   </div>
                 </div>
               )}

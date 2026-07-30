@@ -1,60 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-
-interface Project {
-  id: string;
-  number: string;
-  title: string;
-  tagline: string;
-  tags: string[];
-  annotation: string;
-  year: string;
-  embed: 'code' | 'cli' | 'metrics';
-  reversed?: boolean;
-}
-
-const projects: Project[] = [
-{
-    id: 'modmesh',
-    number: '01',
-    title: 'Terraform Module Mesh',
-    tagline: 'A composable infrastructure-as-code framework for multi-environment Azure provisioning — 40% faster deployments.',
-    tags: ['Terraform', 'Azure', 'platform-engineering', 'open-source'],
-    annotation: `Started as a 2am frustration: every Terraform setup I inherited was either copy-pasted spaghetti or had hardcoded values buried in modules. So I built a mesh architecture that doesn't.
-
-It uses a hierarchical composition pattern with environment-aware variable injection — no duplication, just DRY modules and clean separation of concerns. Ships with built-in validation, drift detection, and automated documentation generation.`,
-    year: '2025',
-    embed: 'code',
-    reversed: false,
-  },
-  {
-    id: 'cicdscheduler',
-    number: '02',
-    title: 'GitHub Actions Pipeline Orchestrator',
-    tagline: 'Event-driven CI/CD scheduler with matrix strategy optimization and GitHub Copilot integration.',
-    tags: ['Terraform', 'GitHub-Actions', 'YAML', 'automation'],
-    annotation: `The problem: a monorepo where build times were unpredictable. Downstream jobs were queuing for hours or failing due to resource contention depending on the day.
-
-The orchestrator uses Terraform to provision dynamic runner pools based on queue depth, with intelligent matrix splitting and reusable workflow composition. Build times dropped from 45 minutes to 8 minutes average.`,
-    year: '2025',
-    embed: 'cli',
-    reversed: true,
-  },
-  {
-    id: 'ghasguard',
-    number: '03',
-    title: 'GHAS Security Automation',
-    tagline: 'GitHub Advanced Security implementation with policy-as-code — vulnerabilities caught in minutes, not months.',
-    tags: ['Terraform', 'GHAS', 'security', 'policy-as-code'],
-    annotation: `What's next. Still evolving — the policy engine is solid, the reporting dashboards are in progress.
-
-Terraform-managed GHAS rollout across 200+ repos with custom CodeQL queries, secret scanning alerts routed to Slack, and dependency review gates in PRs. The part I'm most proud of: the policy framework that auto-remediates common issues without human intervention.`,
-    year: '2026 ↗',
-    embed: 'metrics',
-    reversed: false,
-  },
-];
+import { projects, type Project, social } from '@/config/portfolio';
 
 // ─── Code Embed ───────────────────────────────────────────────────────────────
 const CodeEmbed: React.FC = () => (
@@ -83,9 +30,9 @@ const CodeEmbed: React.FC = () => (
           lineHeight: 1.9,
         }}
       >
-        <span className="tok-comment">// Single-producer, single-consumer ring buffer</span>
+        <span className="tok-comment">{'// Single-producer, single-consumer ring buffer'}</span>
         {'\n'}
-        <span className="tok-comment">// Capacity must be a power of two</span>
+        <span className="tok-comment">{'// Capacity must be a power of two'}</span>
         {'\n'}
         <span className="tok-keyword">pub struct </span>
         <span className="tok-type">RingBuf</span>
@@ -177,7 +124,7 @@ const CodeEmbed: React.FC = () => (
         <span className="tok-punct">; {'}'}</span>
         {'\n'}
         {'        '}
-        <span className="tok-comment">// safety: slot is ours until head advances</span>
+        <span className="tok-comment">{'// safety: slot is ours until head advances'}</span>
         {'\n'}
         {'        '}
         <span className="tok-keyword">unsafe </span>
@@ -237,16 +184,18 @@ const CliEmbed: React.FC = () => {
     { prompt: false, text: '  max   51ms   █████████████████░' },
   ];
 
+  const stepCount = steps.length;
+
   useEffect(() => {
-    setStep(0);
+    // Initial state is already 0, so the animation only needs the interval.
     let i = 0;
     const interval = setInterval(() => {
       i++;
       setStep(i);
-      if (i >= steps.length) clearInterval(interval);
+      if (i >= stepCount) clearInterval(interval);
     }, 140);
     return () => clearInterval(interval);
-  }, []);
+  }, [stepCount]);
 
   return (
     <div className="terminal-window w-full">
@@ -345,7 +294,7 @@ const MetricsEmbed: React.FC = () => {
           className="font-serif italic text-sm leading-relaxed"
           style={{ fontFamily: 'Fraunces, serif', color: '#6B6B6B', fontSize: '14px' }}
         >
-          "A sketch, not a render. The diff viewer is still a whiteboard photo."
+          &ldquo;A sketch, not a render. The diff viewer is still a whiteboard photo.&rdquo;
         </p>
       </div>
 
@@ -391,7 +340,7 @@ const MetricsEmbed: React.FC = () => {
           className="font-mono text-xs"
           style={{ fontFamily: 'JetBrains Mono, monospace', color: '#6B6B6B', fontSize: '11px' }}
         >
-          github.com/mSingh/obsidian-sync
+          {social.github.replace(/^https?:\/\//, '')}
         </span>
         <span className="ml-auto tag-pill">WIP</span>
       </div>
@@ -501,7 +450,7 @@ const ProjectRow: React.FC<{ project: Project; index: number }> = ({ project, in
         {/* GitHub link */}
         <div className="mt-8">
           <a
-            href="https://github.com"
+            href={project.repoUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="github-cta"
@@ -528,7 +477,7 @@ const ProjectRow: React.FC<{ project: Project; index: number }> = ({ project, in
 };
 
 const ProjectSpotlight: React.FC = () => (
-  <section id="work" className="bg-parchment">
+  <section id="work" data-tour="work" className="bg-parchment">
     <div
       className="max-w-7xl mx-auto px-8 pt-24 pb-8"
       style={{ borderBottom: '1px solid rgba(59,59,59,0.06)' }}
@@ -553,7 +502,7 @@ const ProjectSpotlight: React.FC = () => (
           lineHeight: 1.1,
         }}
       >
-        Things I've shipped
+        Things I&rsquo;ve shipped
       </h2>
     </div>
 

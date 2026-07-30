@@ -2,35 +2,37 @@
 
 import Image from 'next/image';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { hero, person } from '@/config/portfolio';
 
 // ─── Vignette 1: Terminal ─────────────────────────────────────────────────────
 const TerminalVignette: React.FC<{ active: boolean }> = ({ active }) => {
   const lines = [
-    { type: 'prompt', text: '~/vpnsin' },
-    { type: 'command', text: 'git log --oneline -5' },
-    { type: 'output', text: 'a3f9c12 fix: resolve race condition in event bus' },
-    { type: 'output', text: 'b81e4d7 feat: add zero-copy ring buffer impl' },
-    { type: 'output', text: 'c92a1f0 refactor: extract scheduler into own crate' },
-    { type: 'output', text: 'd44b3e9 docs: annotate lock-free queue invariants' },
-    { type: 'output', text: 'e7f2c88 perf: 2.4× throughput on hot path' },
+    { type: 'prompt', text: hero.terminalPrompt },
+    { type: 'command', text: hero.terminalCommand },
+    ...hero.terminalCommits.map((text) => ({ type: 'output', text })),
   ];
 
   const [visibleLines, setVisibleLines] = useState(0);
+  const lineCount = lines.length;
 
   useEffect(() => {
-    if (!active) {
+    let interval: ReturnType<typeof setInterval> | undefined;
+    // Defer the reset so we never call setState synchronously in the effect body.
+    const kickoff = setTimeout(() => {
       setVisibleLines(0);
-      return;
-    }
-    setVisibleLines(0);
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setVisibleLines(i);
-      if (i >= lines.length) clearInterval(interval);
-    }, 200);
-    return () => clearInterval(interval);
-  }, [active]);
+      if (!active) return;
+      let i = 0;
+      interval = setInterval(() => {
+        i++;
+        setVisibleLines(i);
+        if (i >= lineCount) clearInterval(interval);
+      }, 200);
+    }, 0);
+    return () => {
+      clearTimeout(kickoff);
+      if (interval) clearInterval(interval);
+    };
+  }, [active, lineCount]);
 
   return (
     <div className="terminal-window w-full">
@@ -42,7 +44,7 @@ const TerminalVignette: React.FC<{ active: boolean }> = ({ active }) => {
           className="ml-3 font-mono text-xs"
           style={{ color: '#6B7280', fontFamily: 'JetBrains Mono, monospace' }}
         >
-          ~/vpnsin — zsh
+          {hero.terminalTitle}
         </span>
       </div>
       <div className="terminal-body">
@@ -79,15 +81,20 @@ const TerminalVignette: React.FC<{ active: boolean }> = ({ active }) => {
 // ─── Vignette 2: SVG Architecture Diagram ────────────────────────────────────
 const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
   const [drawing, setDrawing] = useState(false);
+  const { label, caption, nodes, arrows, annotations } = hero.diagram;
+  const NODE_W = 100;
+  const NODE_H = 44;
 
   useEffect(() => {
-    if (active) {
+    let draw: ReturnType<typeof setTimeout> | undefined;
+    const kickoff = setTimeout(() => {
       setDrawing(false);
-      const t = setTimeout(() => setDrawing(true), 100);
-      return () => clearTimeout(t);
-    } else {
-      setDrawing(false);
-    }
+      if (active) draw = setTimeout(() => setDrawing(true), 100);
+    }, 0);
+    return () => {
+      clearTimeout(kickoff);
+      if (draw) clearTimeout(draw);
+    };
   }, [active]);
 
   const pathClass = `diagram-path ${drawing ? 'drawing' : ''}`;
@@ -99,7 +106,7 @@ const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
           className="font-mono text-xs tracking-widest uppercase"
           style={{ fontFamily: 'JetBrains Mono, monospace', color: '#6E8CA0', fontSize: '10px' }}
         >
-          arch // event-driven pipeline
+          {label}
         </span>
       </div>
       <svg
@@ -110,19 +117,13 @@ const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
         style={{ overflow: 'visible' }}
       >
         {/* Nodes */}
-        {[
-          { x: 30, y: 110, w: 100, h: 44, label: 'Producer', sub: 'Terraform' },
-          { x: 210, y: 50, w: 100, h: 44, label: 'Event Bus', sub: 'lock-free' },
-          { x: 210, y: 170, w: 100, h: 44, label: 'Scheduler', sub: 'tokio' },
-          { x: 390, y: 50, w: 100, h: 44, label: 'Consumer A', sub: 'async' },
-          { x: 390, y: 170, w: 100, h: 44, label: 'Consumer B', sub: 'async' },
-        ].map((node, i) => (
+        {nodes.map((node, i) => (
           <g key={i}>
             <rect
               x={node.x}
               y={node.y}
-              width={node.w}
-              height={node.h}
+              width={NODE_W}
+              height={NODE_H}
               rx="8"
               fill="rgba(245,240,235,0.9)"
               stroke="#6E8CA0"
@@ -135,9 +136,8 @@ const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
                 transition: `opacity 0.4s ease ${i * 0.25}s`,
               }}
             />
-
             <text
-              x={node.x + node.w / 2}
+              x={node.x + NODE_W / 2}
               y={node.y + 18}
               textAnchor="middle"
               fill="#3B3B3B"
@@ -152,7 +152,7 @@ const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
               {node.label}
             </text>
             <text
-              x={node.x + node.w / 2}
+              x={node.x + NODE_W / 2}
               y={node.y + 33}
               textAnchor="middle"
               fill="#6E8CA0"
@@ -169,13 +169,7 @@ const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
         ))}
 
         {/* Arrows */}
-        {[
-          { d: 'M 130 132 C 170 132 170 72 210 72', delay: '0.6s' },
-          { d: 'M 130 132 C 170 132 170 192 210 192', delay: '0.8s' },
-          { d: 'M 310 72 L 390 72', delay: '1.0s' },
-          { d: 'M 310 192 L 390 192', delay: '1.2s' },
-          { d: 'M 260 94 L 260 170', delay: '1.4s' },
-        ].map((arrow, i) => (
+        {arrows.map((arrow, i) => (
           <path
             key={i}
             d={arrow.d}
@@ -190,50 +184,20 @@ const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
         ))}
 
         {/* Annotation labels */}
-        {drawing && (
-          <>
+        {drawing &&
+          annotations.map((a, i) => (
             <text
-              x="155"
-              y="100"
+              key={i}
+              x={a.x}
+              y={a.y}
               fill="#C2785C"
               fontSize="9"
               fontFamily="JetBrains Mono"
-              style={{ opacity: drawing ? 1 : 0, transition: 'opacity 0.4s 1.2s' }}
+              style={{ opacity: drawing ? 1 : 0, transition: `opacity 0.4s ${a.delay}` }}
             >
-              mpsc
+              {a.text}
             </text>
-            <text
-              x="155"
-              y="200"
-              fill="#C2785C"
-              fontSize="9"
-              fontFamily="JetBrains Mono"
-              style={{ opacity: drawing ? 1 : 0, transition: 'opacity 0.4s 1.3s' }}
-            >
-              mpsc
-            </text>
-            <text
-              x="330"
-              y="65"
-              fill="#C2785C"
-              fontSize="9"
-              fontFamily="JetBrains Mono"
-              style={{ opacity: drawing ? 1 : 0, transition: 'opacity 0.4s 1.4s' }}
-            >
-              push
-            </text>
-            <text
-              x="330"
-              y="185"
-              fill="#C2785C"
-              fontSize="9"
-              fontFamily="JetBrains Mono"
-              style={{ opacity: drawing ? 1 : 0, transition: 'opacity 0.4s 1.5s' }}
-            >
-              push
-            </text>
-          </>
-        )}
+          ))}
 
         {/* Arrowhead marker */}
         <defs>
@@ -251,7 +215,7 @@ const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
           lineHeight: 1.6,
         }}
       >
-        Zero-allocation hot path. 2.4× throughput over previous design.
+        {caption}
       </p>
     </div>
   );
@@ -259,36 +223,40 @@ const DiagramVignette: React.FC<{ active: boolean }> = ({ active }) => {
 
 // ─── Vignette 3: Typewriter Quote ────────────────────────────────────────────
 const TypewriterVignette: React.FC<{ active: boolean }> = ({ active }) => {
-  const fullText =
-    '"The code review was surgical. Every comment was a lesson — not a correction. I\'ve been doing this for twelve years and I still learned something new about ownership semantics."';
-  const attribution = '— Sumit Kumar, Staff Engineer at Salesforce';
+  const fullText = `"${hero.quote.text}"`;
 
   const [displayedText, setDisplayedText] = useState('');
   const [showAttrib, setShowAttrib] = useState(false);
   const [typing, setTyping] = useState(false);
 
   useEffect(() => {
-    if (!active) {
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let attrib: ReturnType<typeof setTimeout> | undefined;
+    const kickoff = setTimeout(() => {
       setDisplayedText('');
       setShowAttrib(false);
-      setTyping(false);
-      return;
-    }
-    setDisplayedText('');
-    setShowAttrib(false);
-    setTyping(true);
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setDisplayedText(fullText.slice(0, i));
-      if (i >= fullText.length) {
-        clearInterval(interval);
+      if (!active) {
         setTyping(false);
-        setTimeout(() => setShowAttrib(true), 400);
+        return;
       }
-    }, 28);
-    return () => clearInterval(interval);
-  }, [active]);
+      setTyping(true);
+      let i = 0;
+      interval = setInterval(() => {
+        i++;
+        setDisplayedText(fullText.slice(0, i));
+        if (i >= fullText.length) {
+          clearInterval(interval);
+          setTyping(false);
+          attrib = setTimeout(() => setShowAttrib(true), 400);
+        }
+      }, 28);
+    }, 0);
+    return () => {
+      clearTimeout(kickoff);
+      if (interval) clearInterval(interval);
+      if (attrib) clearTimeout(attrib);
+    };
+  }, [active, fullText]);
 
   return (
     <div className="w-full max-w-[560px]">
@@ -304,7 +272,7 @@ const TypewriterVignette: React.FC<{ active: boolean }> = ({ active }) => {
           marginBottom: '-1rem',
         }}
       >
-        "
+        &ldquo;
       </div>
 
       <p className="typewriter-text" style={{ minHeight: '160px' }}>
@@ -320,27 +288,29 @@ const TypewriterVignette: React.FC<{ active: boolean }> = ({ active }) => {
           transform: showAttrib ? 'translateY(0)' : 'translateY(8px)',
         }}
       >
-        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-          <Image
-            width={64}
-            height={64}
-            src="https://media.licdn.com/dms/image/v2/D4E03AQFJWP9HrgaCpg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1732404714238?e=1778112000&v=beta&t=3cinkLwM7BeOk37JREfeqG8xbh_pO-1Bja7hs8feC4I"
-            alt="Heena Mistry, IT Prject Manager at West Yorkshire Police"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        {hero.quote.avatar && (
+          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+            <Image
+              width={64}
+              height={64}
+              src={hero.quote.avatar}
+              alt={hero.quote.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
         <div>
           <p
             className="font-mono text-sm font-medium"
             style={{ fontFamily: 'JetBrains Mono, monospace', color: '#3B3B3B', fontSize: '13px' }}
           >
-            Heena Mistry
+            {hero.quote.name}
           </p>
           <p
             className="text-xs mt-0.5"
             style={{ fontFamily: 'DM Sans, sans-serif', color: '#6B6B6B', fontSize: '12px' }}
           >
-            IT Project Manager · West Yorkshire Police
+            {hero.quote.title}
           </p>
         </div>
       </div>
@@ -352,7 +322,7 @@ const TypewriterVignette: React.FC<{ active: boolean }> = ({ active }) => {
 const HeroSection: React.FC = () => {
   const [activeVignette, setActiveVignette] = useState(0);
   const [isLocked, setIsLocked] = useState(true);
-  const [scrollDelta, setScrollDelta] = useState(0);
+  const [, setScrollDelta] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const lockRef = useRef(true);
   const deltaRef = useRef(0);
@@ -415,6 +385,7 @@ const HeroSection: React.FC = () => {
   return (
     <section
       ref={heroRef}
+      data-tour="hero"
       className="relative bg-parchment"
       style={{
         height: '100vh',
@@ -435,7 +406,7 @@ const HeroSection: React.FC = () => {
 
       <div className="relative h-full flex">
         {/* ─── 60% Left: Vignette stage ─── */}
-        <div className="relative flex-[6] h-full overflow-hidden">
+        <div className="relative flex-[6] h-full overflow-hidden" data-tour="hero-stage">
           {/* Vignette 0: Terminal */}
           <div
             className={`vignette-panel ${activeVignette === 0 ? 'active' : activeVignette > 0 ? 'exiting' : ''}`}
@@ -528,7 +499,7 @@ const HeroSection: React.FC = () => {
         <div className="w-px bg-graphite/8 self-stretch" />
 
         {/* ─── 40% Right: Name spine ─── */}
-        <div className="name-spine flex-[4]">
+        <div className="name-spine flex-[4]" data-tour="hero-name">
           {/* Eyebrow */}
           <div className="mb-4">
             <span
@@ -540,7 +511,7 @@ const HeroSection: React.FC = () => {
                 letterSpacing: '0.25em',
               }}
             >
-              Senior DevOps Engineer
+              {person.role}
             </span>
           </div>
 
@@ -555,9 +526,9 @@ const HeroSection: React.FC = () => {
               letterSpacing: '-0.02em',
             }}
           >
-            FIRST Name
+            {person.firstName}
             <br />
-            <span style={{ fontStyle: 'italic', fontWeight: 300 }}>Last Name</span>
+            <span style={{ fontStyle: 'italic', fontWeight: 300 }}>{person.lastName}</span>
           </h1>
 
           {/* Thin rule */}
@@ -573,52 +544,12 @@ const HeroSection: React.FC = () => {
               lineHeight: 1.75,
             }}
           >
-            I build systems that run fast and fail gracefully. Terraform, Nodejs, distributed
-            infrastructure — have been working and sharing my findings from the following.
+            {person.bio}
           </p>
 
           {/* Stack tags */}
           <div className="flex flex-wrap gap-2 mt-6">
-            {[
-              'AEM',
-              'Agile',
-              'AI',
-              'Amplience',
-              'Application Insights',
-              'Azure',
-              'Azure Artifacts',
-              'Azure DevOps',
-              'Azure Monitor',
-              'Claude',
-              'CodeQL',
-              'Docker',
-              'DAST',
-              'GHAS',
-              'Git',
-              'GitHub',
-              'GitHub Actions',
-              'GitLab',
-              'Google Release Please',
-              'JavaScript',
-              'Wiki',
-              'Kubernetes',
-              'Mentoring',
-              'Next.js',
-              'Node.js',
-              'Peer Reviews',
-              'React',
-              'Reactjs',
-              'CI/CD',
-              'Scrum',
-              'Snyk',
-              'Sonar',
-              'SAST',
-              'Terraform',
-              'Trivy',
-              'TypeScript',
-              'Unit Testing',
-              'YAML',
-            ].map((tag) => (
+            {person.skills.map((tag) => (
               <span key={tag} className="tag-pill">
                 {tag}
               </span>
@@ -626,28 +557,31 @@ const HeroSection: React.FC = () => {
           </div>
 
           {/* Location + availability */}
-          <div className="mt-10 flex items-center gap-3">
-            <span className="relative flex h-2 w-2">
+          {person.availability && (
+            <div className="mt-10 flex items-center gap-3">
+              <span className="relative flex h-2 w-2">
+                <span
+                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                  style={{ background: '#28CA42' }}
+                />
+                <span
+                  className="relative inline-flex rounded-full h-2 w-2"
+                  style={{ background: '#28CA42' }}
+                />
+              </span>
               <span
-                className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                style={{ background: '#28CA42' }}
-              />
-              <span
-                className="relative inline-flex rounded-full h-2 w-2"
-                style={{ background: '#28CA42' }}
-              />
-            </span>
-            <span
-              className="font-mono text-xs"
-              style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                color: '#6B6B6B',
-                fontSize: '11px',
-              }}
-            >
-              Open to senior / lead roles · Leeds'{'United Kingdom'}'
-            </span>
-          </div>
+                className="font-mono text-xs"
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace',
+                  color: '#6B6B6B',
+                  fontSize: '11px',
+                }}
+              >
+                {person.availability}
+                {person.location ? ` · ${person.location}` : ''}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </section>

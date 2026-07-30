@@ -1,93 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-
-interface Essay {
-  id: number;
-  title: string;
-  excerpt: string;
-  tags: string[];
-  readTime: string;
-  date: string;
-  rotate: string;
-  translateY: string;
-  color: string;
-}
-
-const essays: Essay[] = [
-  {
-    id: 1,
-    title: 'Terraform State: The Silent Killer of Velocity',
-    excerpt:
-      "Three years of platform engineering taught me that state management isn't just about locking — it's about team boundaries, blast radius, and the art of refactoring without downtime. A dispatch from the trenches of multi-environment Azure provisioning.",
-    tags: ['Terraform', 'Azure', 'platform-engineering'],
-    readTime: '8 min',
-    date: 'Jan 2026',
-    rotate: '-rotate-2',
-    translateY: 'translate-y-4',
-    color: '#6E8CA0',
-  },
-  {
-    id: 2,
-    title: 'The Lie of "Simple" GitHub Actions',
-    excerpt:
-      'Everyone says "just use reusable workflows." Nobody talks about what happens at 3am when a matrix strategy fails halfway through a production deployment and you\'re hunting down a YAML indentation bug.',
-    tags: ['GitHub-Actions', 'YAML', 'DevOps'],
-    readTime: '12 min',
-    date: 'Nov 2025',
-    rotate: 'rotate-1',
-    translateY: 'translate-y-8',
-    color: '#C2785C',
-  },
-  {
-    id: 3,
-    title: 'GHAS Is Not a Checkbox',
-    excerpt:
-      "The hidden cost of security automation: alert fatigue, false positives that train teams to ignore warnings, and the CodeQL queries that don't catch what matters until it's too late.",
-    tags: ['GHAS', 'CodeQL', 'security'],
-    readTime: '15 min',
-    date: 'Sep 2025',
-    rotate: '-rotate-1',
-    translateY: 'translate-y-2',
-    color: '#3B3B3B',
-  },
-  {
-    id: 4,
-    title: 'Writing Terraform That Reads Like Documentation',
-    excerpt:
-      "Variable names and module structures are the cheapest documentation you'll ever write. A case for naming your resources as carefully as you name your functions.",
-    tags: ['Terraform', 'craft', 'readability'],
-    readTime: '6 min',
-    date: 'Jul 2025',
-    rotate: 'rotate-3',
-    translateY: 'translate-y-6',
-    color: '#6E8CA0',
-  },
-  {
-    id: 5,
-    title: 'On Building Pipelines That Outlast You',
-    excerpt:
-      'A meditation on CI/CD workflows that run in production for years. What decisions made them maintainable, and why I now obsess over YAML validation and drift detection.',
-    tags: ['DevOps', 'architecture', 'GitHub-Actions'],
-    readTime: '10 min',
-    date: 'May 2025',
-    rotate: '-rotate-3',
-    translateY: 'translate-y-0',
-    color: '#C2785C',
-  },
-  {
-    id: 6,
-    title: 'The Copilot Trap',
-    excerpt:
-      "When AI code generation became mainstream, we all reached for it reflexively. Here's when writing your own Terraform modules and understanding your infrastructure is still the right answer.",
-    tags: ['AI', 'Claude', 'Terraform'],
-    readTime: '9 min',
-    date: 'Mar 2025',
-    rotate: 'rotate-2',
-    translateY: 'translate-y-3',
-    color: '#3B3B3B',
-  },
-];
+import { essays, essaysMeta, type Essay } from '@/config/portfolio';
 
 const EssayCard: React.FC<{
   essay: Essay;
@@ -96,8 +10,9 @@ const EssayCard: React.FC<{
   blurred: boolean;
 }> = ({ essay, onHover, onLeave, blurred }) => {
   return (
-    <div
-      className={`essay-card ${essay.rotate} ${essay.translateY}`}
+    <a
+      href={essay.href}
+      className={`essay-card block ${essay.rotate} ${essay.translateY}`}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
       style={{
@@ -164,7 +79,7 @@ const EssayCard: React.FC<{
           </span>
         </div>
       </div>
-    </div>
+    </a>
   );
 };
 
@@ -187,6 +102,7 @@ const EssayGallery: React.FC = () => {
   return (
     <section
       id="writing"
+      data-tour="writing"
       ref={sectionRef}
       className="py-32 px-8 bg-parchment-dark overflow-hidden"
       style={{
@@ -207,7 +123,7 @@ const EssayGallery: React.FC = () => {
                 letterSpacing: '0.25em',
               }}
             >
-              Technical Writing
+              {essaysMeta.eyebrow}
             </span>
             <h2
               className="font-serif font-light mt-3 leading-tight"
@@ -218,7 +134,7 @@ const EssayGallery: React.FC = () => {
                 lineHeight: 1.1,
               }}
             >
-              Essays from the experience
+              {essaysMeta.heading}
             </h2>
           </div>
           <p
@@ -230,8 +146,7 @@ const EssayGallery: React.FC = () => {
               lineHeight: 1.75,
             }}
           >
-            Long-form writing on systems design, Terraform internals, and the craft of building
-            software that lasts.
+            {essaysMeta.intro}
           </p>
         </div>
 
@@ -261,25 +176,31 @@ const EssayGallery: React.FC = () => {
         </div>
 
         {/* All essays link */}
-        <div className="mt-16 text-center">
-          <a
-            href="#"
-            className="inline-flex items-center gap-2 font-mono text-sm hover:text-clay transition-colors duration-200"
-            style={{ fontFamily: 'JetBrains Mono, monospace', color: '#6E8CA0', fontSize: '13px' }}
-          >
-            Read all 24 essays
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+        {essaysMeta.allLabel && (
+          <div className="mt-16 text-center">
+            <a
+              href={essaysMeta.allHref}
+              className="inline-flex items-center gap-2 font-mono text-sm hover:text-clay transition-colors duration-200"
+              style={{
+                fontFamily: 'JetBrains Mono, monospace',
+                color: '#6E8CA0',
+                fontSize: '13px',
+              }}
             >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </a>
-        </div>
+              {essaysMeta.allLabel}
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

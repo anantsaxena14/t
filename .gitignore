@@ -2,6 +2,11 @@
 node_modules/
 package-lock.json
 
+# Local env (keep .env.example committed, keep real secrets out)
+.env
+.env.local
+.env.*.local
+
 # Next.js build output
 .next/
 out/

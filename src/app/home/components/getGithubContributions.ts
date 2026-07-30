@@ -54,13 +54,39 @@ export interface GithubStats {
   topLanguages: { language: string; count: number }[];
 }
 
+// ── Minimal shapes of the external API responses we consume ──────────────────
+interface ContribApiResponse {
+  total: { lastYear: number };
+  contributions: { date: string; count: number }[];
+}
+
+interface GithubProfile {
+  name: string | null;
+  avatar_url: string;
+  bio: string | null;
+  location: string | null;
+  html_url: string;
+  public_repos: number;
+  followers: number;
+  following: number;
+}
+
+interface GithubRepo {
+  name: string;
+  description: string | null;
+  stargazers_count: number;
+  forks_count: number;
+  watchers_count: number;
+  language: string | null;
+  html_url: string;
+  fork: boolean;
+}
+
 export async function getGithubContributions(username: string): Promise<GithubStats> {
   const HEADERS = {
-    Accept: "application/vnd.github+json",
+    Accept: 'application/vnd.github+json',
     // Add token if available — raises rate limit from 60 to 5000 req/hr
-    ...(process.env.GITHUB_TOKEN
-      ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
-      : {}),
+    ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
   };
 
   // Run all fetches in parallel
@@ -86,29 +112,30 @@ export async function getGithubContributions(username: string): Promise<GithubSt
   if (!reposRes.ok)
     throw new Error(`GitHub repos fetch failed for "${username}": ${reposRes.status}`);
 
-  const [contribJson, profile, repos] = await Promise.all([
+  const [contribJson, profile, repos] = (await Promise.all([
     contribRes.json(),
     profileRes.json(),
     reposRes.json(),
-  ]);
+  ])) as [ContribApiResponse, GithubProfile, GithubRepo[]];
 
   // ── Contributions ──────────────────────────────────────────────────────────
-  const days: { date: string; count: number }[] = contribJson.contributions.map(
-    (d: any) => ({ date: d.date, count: d.count })
-  );
+  const days: { date: string; count: number }[] = contribJson.contributions.map((d) => ({
+    date: d.date,
+    count: d.count,
+  }));
 
   // ── Repo aggregates ────────────────────────────────────────────────────────
   // Exclude forks so stats reflect original work
-  const ownRepos: any[] = repos.filter((r: any) => !r.fork);
+  const ownRepos: GithubRepo[] = repos.filter((r) => !r.fork);
 
-  const totalStars = ownRepos.reduce((sum: number, r: any) => sum + r.stargazers_count, 0);
-  const totalForks = ownRepos.reduce((sum: number, r: any) => sum + r.forks_count, 0);
-  const totalWatchers = ownRepos.reduce((sum: number, r: any) => sum + r.watchers_count, 0);
+  const totalStars = ownRepos.reduce((sum, r) => sum + r.stargazers_count, 0);
+  const totalForks = ownRepos.reduce((sum, r) => sum + r.forks_count, 0);
+  const totalWatchers = ownRepos.reduce((sum, r) => sum + r.watchers_count, 0);
 
   const topRepos = [...ownRepos]
     .sort((a, b) => b.stargazers_count - a.stargazers_count)
     .slice(0, 6)
-    .map((r: any) => ({
+    .map((r) => ({
       name: r.name,
       description: r.description ?? null,
       stars: r.stargazers_count,
@@ -126,15 +153,15 @@ export async function getGithubContributions(username: string): Promise<GithubSt
     .sort(([, a], [, b]) => b - a)
     .slice(0, 6)
     .map(([language, count]) => ({ language, count }));
- 
+
   return {
     total: contribJson.total.lastYear as number,
     days,
 
     name: profile.name ?? username,
     avatarUrl: profile.avatar_url,
-    bio: profile.bio ?? "",
-    location: profile.location ?? "",
+    bio: profile.bio ?? '',
+    location: profile.location ?? '',
     profileUrl: profile.html_url,
 
     publicRepos: profile.public_repos,

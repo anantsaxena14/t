@@ -6,6 +6,7 @@ import ProjectSpotlight from './components/ProjectSpotlight';
 import EssayGallery from './components/EssayGallery';
 import PeerSignal from './components/PeerSignal';
 import WaitlistSection from './components/WaitlistSection';
+import AppTour from '@/components/tour/AppTour';
 
 export default function HomePage() {
   return (
@@ -36,6 +37,9 @@ export default function HomePage() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Guided "what can I change?" tour for people forking the template */}
+      <AppTour />
     </main>
   );
 }

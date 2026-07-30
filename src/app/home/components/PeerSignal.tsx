@@ -1,31 +1,9 @@
 'use client';
 
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import AppImage from '@/components/ui/AppImage';
 import { getGithubContributions, GithubStats } from './getGithubContributions';
-
-interface Testimonial {
-  quote: string;
-  name: string;
-  title: string;
-  linkedin: string;
-  company: string;
-  avatar: string;
-  context: string;
-}
-
-const testimonials: Testimonial[] = [
-  {
-    quote:
-      "His deep dive on GitHub Advanced Security integration was eye-opening. YourName doesn't just implement tools—he architects secure-by-default pipelines. The way he explained GHAS to our team made adoption immediate.",
-    name: 'Sumit Kumar',
-    title: 'Senior Application Engineer',
-    linkedin: "https://www.linkedin.com/in/vipin-k-singh/",
-    avatar: "https://media.licdn.com/dms/image/v2/D5603AQFox9ZZrFrZ2A/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1712355884709?e=1778716800&v=beta&t=M4p6yFdBh51D9MyjtDsIlQswinuP54bPpBeasLBR46w",
-    company: 'SAP Labs',
-    context: 'After a conference talk',
-  }
-];
+import { testimonials, social } from '@/config/portfolio';
 
 // Maps a raw contribution count to a 0–4 level for colour bucketing
 export const getContribLevel = (count: number): number => {
@@ -50,11 +28,9 @@ export const getContribLevel = (count: number): number => {
  *     function receives the values it expects.
  */
 export const transformContribData = (res: GithubStats): number[][] => {
-  const { days } = res
+  const { days } = res;
   // Sort ascending so week 0 is the oldest
-  const sorted = [...days].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
+  const sorted = [...days].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const weeks: number[][] = [];
 
@@ -76,7 +52,7 @@ export const transformContribData = (res: GithubStats): number[][] => {
 
 // GitHub contribution heatmap mock
 const generateContribData = async () => {
-  const res = await getGithubContributions('vpnsin');
+  const res = await getGithubContributions(social.githubUsername);
   const contribData = transformContribData(res);
   return { res, contribData };
 };
@@ -93,7 +69,10 @@ const getContribColor = (level: number): string => {
 const PeerSignal: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  const [userData, setUserData] = React.useState<{ res: GithubStats; contribData: number[][]; }>({ res: {} as GithubStats, contribData: [] });
+  const [userData, setUserData] = React.useState<{ res: GithubStats; contribData: number[][] }>({
+    res: {} as GithubStats,
+    contribData: [],
+  });
 
   React.useEffect(() => {
     generateContribData().then(setUserData);
@@ -112,6 +91,8 @@ const PeerSignal: React.FC = () => {
 
   return (
     <section
+      id="peer"
+      data-tour="peer"
       ref={sectionRef}
       className="py-32 px-8 bg-parchment"
       style={{
@@ -164,7 +145,7 @@ const PeerSignal: React.FC = () => {
                   lineHeight: 1,
                 }}
               >
-                "
+                &ldquo;
               </div>
               <p
                 className="font-serif italic leading-relaxed mb-8"
@@ -178,18 +159,18 @@ const PeerSignal: React.FC = () => {
                 {testimonials[0].quote}
               </p>
               <div className="flex items-center gap-4">
-                <div
-                  className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white ring-opacity-10"
-                >
-                  <AppImage
-                    src={testimonials[0].avatar}
-                    alt={`${testimonials[0].name}, ${testimonials[0].title} at ${testimonials[0].company}`}
-                    width={44}
-                    height={44}
-                    className="w-full h-full object-cover"
-                    onClick={() => window.open(testimonials[0].linkedin, '_blank')}
-                  />
-                </div>
+                {testimonials[0].avatar && (
+                  <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white ring-opacity-10">
+                    <AppImage
+                      src={testimonials[0].avatar}
+                      alt={`${testimonials[0].name}, ${testimonials[0].title} at ${testimonials[0].company}`}
+                      width={44}
+                      height={44}
+                      className="w-full h-full object-cover"
+                      onClick={() => window.open(testimonials[0].linkedin, '_blank')}
+                    />
+                  </div>
+                )}
                 <div>
                   <p
                     className="font-mono text-sm font-medium"
@@ -250,19 +231,21 @@ const PeerSignal: React.FC = () => {
                     lineHeight: 1.75,
                   }}
                 >
-                  "{t.quote}"
+                  &ldquo;{t.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
-                    <AppImage
-                      src={t.avatar}
-                      alt={`${t.name}, ${t.title} at ${t.company}`}
-                      onClick={() => window.open(t.linkedin, '_blank')}
-                      width={36}
-                      height={36}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  {t.avatar && (
+                    <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
+                      <AppImage
+                        src={t.avatar}
+                        alt={`${t.name}, ${t.title} at ${t.company}`}
+                        onClick={() => window.open(t.linkedin, '_blank')}
+                        width={36}
+                        height={36}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <div>
                     <p
                       className="font-mono text-xs font-medium"
@@ -319,12 +302,14 @@ const PeerSignal: React.FC = () => {
               >
                 GitHub Activity
               </p>
-              {userData?.res?.total && <p
-                className="font-serif font-medium"
-                style={{ fontFamily: 'Fraunces, serif', color: '#3B3B3B', fontSize: '18px' }}
-              >
-                {userData.res.total} contributions in the last year
-              </p>}
+              {userData?.res?.total && (
+                <p
+                  className="font-serif font-medium"
+                  style={{ fontFamily: 'Fraunces, serif', color: '#3B3B3B', fontSize: '18px' }}
+                >
+                  {userData.res.total} contributions in the last year
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <span
@@ -353,7 +338,7 @@ const PeerSignal: React.FC = () => {
           <div className="overflow-x-auto">
             <div className="flex gap-1" style={{ minWidth: '700px' }}>
               {userData?.contribData?.length === 0 ? (
-                <div style={{ color: "#6B6B6B", fontSize: 12 }}>Loading...</div>
+                <div style={{ color: '#6B6B6B', fontSize: 12 }}>Loading...</div>
               ) : (
                 userData?.contribData.map((week, wi) => (
                   <div key={wi} className="flex flex-col gap-1">
@@ -366,7 +351,8 @@ const PeerSignal: React.FC = () => {
                       />
                     ))}
                   </div>
-                )))}
+                ))
+              )}
             </div>
           </div>
 
