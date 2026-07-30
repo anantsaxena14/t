@@ -555,9 +555,9 @@ const HeroSection: React.FC = () => {
               letterSpacing: '-0.02em',
             }}
           >
-            Vipin
+            FIRST Name
             <br />
-            <span style={{ fontStyle: 'italic', fontWeight: 300 }}>Singh</span>
+            <span style={{ fontStyle: 'italic', fontWeight: 300 }}>Last Name</span>
           </h1>
 
           {/* Thin rule */}

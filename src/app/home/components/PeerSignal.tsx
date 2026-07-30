@@ -15,57 +15,16 @@ interface Testimonial {
 }
 
 const testimonials: Testimonial[] = [
-
   {
     quote:
-      "Vipin's deployment strategy saved us from a critical outage. His understanding of Azure infrastructure and Terraform automation turned a potential disaster into a seamless rollback. The monitoring dashboards he built are still our gold standard.",
-    name: 'Linda Chambers',
-    title: 'IT Delivery Manager',
-    linkedin: "https://www.linkedin.com/in/linda-chambers-8222762/",
-    avatar: "https://media.licdn.com/dms/image/v2/C4D03AQGwciuz13HJwg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1610479936431?e=1778112000&v=beta&t=nHwrbi7Qdt0a2zuajNhGnJUQ7Dqg08nbqi9CDtlrtQE",
-    company: 'ASDA',
-    context: 'On a Production Deployment',
-  },
-  {
-    quote:
-      "His deep dive on GitHub Advanced Security integration was eye-opening. Vipin doesn't just implement tools—he architects secure-by-default pipelines. The way he explained GHAS to our team made adoption immediate.",
+      "His deep dive on GitHub Advanced Security integration was eye-opening. YourName doesn't just implement tools—he architects secure-by-default pipelines. The way he explained GHAS to our team made adoption immediate.",
     name: 'Sumit Kumar',
     title: 'Senior Application Engineer',
-    linkedin: "https://www.linkedin.com/in/sumit1523/",
+    linkedin: "https://www.linkedin.com/in/vipin-k-singh/",
     avatar: "https://media.licdn.com/dms/image/v2/D5603AQFox9ZZrFrZ2A/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1712355884709?e=1778716800&v=beta&t=M4p6yFdBh51D9MyjtDsIlQswinuP54bPpBeasLBR46w",
     company: 'SAP Labs',
     context: 'After a conference talk',
-  },
-  {
-    quote:
-      "The platform engineering work Vipin delivered was exceptional. His infrastructure-as-code approach with Terraform and YAML templating made our handover process smooth. Everything was documented, tested, and production-ready from day one.",
-    name: 'Mayank Chandravanshi',
-    title: 'Automation Test Lead',
-    linkedin: "https://www.linkedin.com/in/mayank-chandravanshi/",
-    avatar: "https://media.licdn.com/dms/image/v2/D4E03AQFxWASLR61huw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1728516984416?e=1778716800&v=beta&t=gvdqMwlakQaB_yCMkPRBw4mUDTGar7yD17m4R4CVp94",
-    company: 'Accenture',
-    context: 'After a HOTO(Handover Takeover) meeting',
-  },
-  {
-    quote:
-      "Vipin's MERN stack architecture is handling 80k requests/sec in production. His CI/CD pipelines using GitHub Copilot for code generation and automated testing caught issues before they reached staging. Zero downtime in six months.",
-    name: 'Aniket Bhatt',
-    title: 'Engineering Manager',
-    linkedin: "https://www.linkedin.com/in/aniket-bhatt-54633bb/",
-    avatar: "https://media.licdn.com/dms/image/v2/C4E03AQF5SQHFRbsI1g/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1516359155905?e=1778112000&v=beta&t=8qRrkfbAgtJHYw6_uMQIuw5vPjWoVrVjV5ZFzGutxaE",
-    company: 'ASDA',
-    context: 'GitHub discussion thread',
-  },
-  {
-    quote:
-      "Working alongside Vipin on our Azure cloud migration was a masterclass in DevOps excellence. His Terraform modules for multi-environment provisioning and GitHub Actions workflows reduced our deployment time by 70%. The infrastructure he designed is self-healing and fully observable.",
-    name: 'Biswajit Kar',
-    title: 'Senior DevOps Engineer',
-    linkedin: "https://www.linkedin.com/in/biswajit-kar-1b641a141/",
-    avatar: "https://media.licdn.com/dms/image/v2/C4D03AQGQeh00yoX5IA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1635530611405?e=1778112000&v=beta&t=DXstjrR4gcobFdfsFBZNt7GxIUk__jQt_ouadAfjRQ0",
-    company: 'TCS',
-    context: 'Post cloud migration project',
-  },
+  }
 ];
 
 // Maps a raw contribution count to a 0–4 level for colour bucketing
