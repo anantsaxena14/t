@@ -24,9 +24,9 @@
  * Shown in the browser tab and by search engines & social cards. */
 export const site = {
   /** Short brand shown in the header & footer (e.g. a handle or initials). */
-  brand: 'vpnsin',
+  brand: 'alpha',
   /** <title> tag. */
-  title: 'vpnsin — Engineering Work by Hand',
+  title: 'alpha — Dumboo',
   /** <meta name="description">. Keep it under ~160 characters. */
   description:
     'The workshop of a devops engineer who ships real things. Projects, essays, and open-source contributions — hand-finished, annotated, and honest.',
@@ -37,10 +37,10 @@ export const site = {
 /* ── 2. Person ─────────────────────────────────────────────────────────────
  * Who you are. Drives the hero "name spine", header, and footer. */
 export const person = {
-  firstName: 'First',
-  lastName: 'Name',
+  firstName: 'Anant',
+  lastName: 'Saxena',
   /** The small eyebrow above your name (your title / role). */
-  role: 'Senior DevOps Engineer',
+  role: 'Full Stack Web Developer',
   /** One or two sentences under your name in the hero. */
   bio: 'I build systems that run fast and fail gracefully. Terraform, Node.js, distributed infrastructure — I share what I learn as I build.',
   /** City, Country — shown next to the availability dot. */
